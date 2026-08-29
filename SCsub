@@ -44,7 +44,7 @@ if env["platform"] != "windows" or env.get("use_mingw", False):
         pass
     env_sandbox.Append(CXXFLAGS=cxx_flags)
 else:
-    env_sandbox.Append(CXXFLAGS=["/std:c++20"])
+    env_sandbox.Append(CXXFLAGS=["/std:c++20", "/Zc:preprocessor"])
 
 # Platform-specific configurations
 if env["platform"] == "windows":
@@ -61,10 +61,17 @@ elif env["platform"] == "linux" or env["platform"] == "android":
     env_sandbox.Prepend(CPPPATH=["#modules/sandbox/thirdparty/libriscv/lib/libriscv/lib/linux"])
 
 # Add libriscv source files
+is_msvc = env["platform"] == "windows" and not env.get("use_mingw", False)
+
 librisc_sources = [
-    # threaded fast-path:
-    "thirdparty/libriscv/lib/libriscv/threaded_dispatch.cpp",
+    # threaded fast-path: MSVC has no computed goto, so it threads through a
+    # function-pointer table instead. Both files keep the same dispatch semantics.
+    "thirdparty/libriscv/lib/libriscv/msvc_threaded_dispatch.cpp"
+    if is_msvc
+    else "thirdparty/libriscv/lib/libriscv/threaded_dispatch.cpp",
+] + ([] if is_msvc else [
     "thirdparty/libriscv/lib/libriscv/threaded_inaccurate_dispatch.cpp",
+]) + [
     "thirdparty/libriscv/lib/libriscv/cpu.cpp",
     "thirdparty/libriscv/lib/libriscv/debug.cpp",
     "thirdparty/libriscv/lib/libriscv/decode_bytecodes.cpp",
