@@ -14,7 +14,11 @@ def can_build(env, platform):
         print("Sandbox module cannot be built for web with exceptions disabled.")
         return False
     # All platforms minus windows without mingw
-    return (env["platform"] == "windows" and env.get("use_mingw", False)) or env["platform"] != "windows"
+    # Windows needs a compiler with the GNU extensions libriscv uses. MinGW and
+    # clang-cl both have them; MSVC does not.
+    if env["platform"] == "windows":
+        return env.get("use_mingw", False) or env.get("use_llvm", False)
+    return True
 
 
 def configure(env):
