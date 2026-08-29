@@ -61,7 +61,6 @@ elif env["platform"] == "linux" or env["platform"] == "android":
     env_sandbox.Prepend(CPPPATH=["#modules/sandbox/thirdparty/libriscv/lib/libriscv/lib/linux"])
 
 # Add libriscv source files
-
 librisc_sources = [
     # threaded fast-path:
     "thirdparty/libriscv/lib/libriscv/threaded_dispatch.cpp",
